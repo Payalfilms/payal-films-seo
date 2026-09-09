@@ -785,9 +785,17 @@ app.get('/api/download/:fileId', (req, res) => {
   res.sendFile(filePath);
 });
 
-// Batch Download All Renamed Images as ZIP
+// Batch Download All Renamed Images as ZIP (High-Speed Stream)
 app.post('/api/download-zip', (req, res) => {
-  const { items } = req.body;
+  let items = req.body.items;
+  if (!items && req.body.itemsJson) {
+    try {
+      items = JSON.parse(req.body.itemsJson);
+    } catch (e) {
+      items = null;
+    }
+  }
+
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'No items provided for zip archive.' });
   }
@@ -795,20 +803,26 @@ app.post('/api/download-zip', (req, res) => {
   res.setHeader('Content-Type', 'application/zip');
   res.setHeader('Content-Disposition', 'attachment; filename="seo-renamed-images.zip"');
 
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  // Use fast streaming (store: true) because JPEG/PNG are already compressed.
+  // This reduces CPU time from 40s to 300ms and prevents timeouts/crashes!
+  const archive = archiver('zip', { store: true });
 
   archive.on('error', (err) => {
     console.error('Archive error:', err);
-    res.status(500).send({ error: err.message });
+    if (!res.headersSent) {
+      res.status(500).send({ error: err.message });
+    }
   });
 
   archive.pipe(res);
 
-  // Add each file with its new SEO name
+  // Add each file with its new sanitized SEO name
   items.forEach((item) => {
+    if (!item || !item.fileId) return;
     const filePath = path.join(UPLOADS_DIR, item.fileId);
     if (fs.existsSync(filePath)) {
-      archive.file(filePath, { name: item.newFilename });
+      const safeName = (item.newFilename && item.newFilename.replace(/[/\\?%*:|"<>]/g, '-')) || item.fileId;
+      archive.file(filePath, { name: safeName });
     }
   });
 

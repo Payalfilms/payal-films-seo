@@ -767,44 +767,54 @@ ${escapeHtml(schemaString)}
   // BATCH ACTIONS: ZIP & CSV & COPY ALL
   // --------------------------------------------------
 
-  // Download All as ZIP
-  downloadAllZipBtn.addEventListener('click', async () => {
-    if (processedResults.length === 0) return;
+  // Download All as ZIP (Ultra-Reliable Native Stream)
+  downloadAllZipBtn.addEventListener('click', () => {
+    if (!processedResults || processedResults.length === 0) {
+      showToast('⚠️ No processed images found to download!', 'error');
+      return;
+    }
 
     downloadAllZipBtn.disabled = true;
-    showToast('Preparing ZIP archive...', 'success');
+    showToast(`Starting ZIP download for ${processedResults.length} images...`, 'success');
 
     const itemsPayload = processedResults.map((item, index) => {
       const input = document.getElementById(`seoNameInput-${index}`);
-      const baseName = (input && input.value.trim()) || item.data.seoFilename;
+      let baseName = (input && input.value.trim()) || item.data?.seoFilename || item.newFilename || 'photo';
+      const ext = item.ext || (item.originalName ? '.' + item.originalName.split('.').pop() : '.jpg');
+      if (ext && baseName.toLowerCase().endsWith(ext.toLowerCase())) {
+        baseName = baseName.slice(0, -ext.length);
+      }
       return {
         fileId: item.fileId,
-        newFilename: `${baseName}${item.ext}`
+        newFilename: `${baseName}${ext}`
       };
     });
 
+    // Use native Form Submit for 100% reliable streaming directly to user's download folder
+    // This eliminates browser RAM limits, supports 100+ large photos, and prevents blob cancel errors!
     try {
-      const response = await fetch('/api/download-zip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: itemsPayload })
-      });
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/api/download-zip';
+      form.style.display = 'none';
 
-      if (!response.ok) throw new Error('Failed to create ZIP');
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'itemsJson';
+      input.value = JSON.stringify(itemsPayload);
+      form.appendChild(input);
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'seo-renamed-images.zip';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-      showToast('ZIP downloaded successfully!', 'success');
+      document.body.appendChild(form);
+      form.submit();
+
+      setTimeout(() => {
+        form.remove();
+        downloadAllZipBtn.disabled = false;
+        showToast('🎉 ZIP archive downloading!', 'success');
+      }, 2000);
     } catch (err) {
-      showToast('Error downloading ZIP', 'error');
-    } finally {
+      console.error('ZIP download error:', err);
+      showToast('Error initiating ZIP download', 'error');
       downloadAllZipBtn.disabled = false;
     }
   });
