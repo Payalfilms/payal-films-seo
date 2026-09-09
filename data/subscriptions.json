@@ -1,0 +1,45 @@
+{
+  "users": {
+    "test_payal_user_123": {
+      "userToken": "test_payal_user_123",
+      "plan": "free",
+      "creditsRemaining": 10,
+      "creditsUsed": 0,
+      "createdAt": "2026-09-09T16:27:56.805Z",
+      "updatedAt": "2026-09-09T16:27:56.805Z"
+    },
+    "usr_e8u3kg5mtuc12cg": {
+      "userToken": "usr_e8u3kg5mtuc12cg",
+      "plan": "pro",
+      "creditsRemaining": 6000,
+      "creditsUsed": 10,
+      "createdAt": "2026-09-09T16:48:08.290Z",
+      "updatedAt": "2026-09-09T17:06:33.760Z",
+      "upgradedAt": "2026-09-09T17:06:33.760Z"
+    }
+  },
+  "payments": [],
+  "redeemedUtrs": {
+    "085995211552": {
+      "userToken": "usr_e8u3kg5mtuc12cg",
+      "planId": "starter",
+      "amount": 499,
+      "redeemedAt": "2026-09-09T16:56:07.799Z"
+    }
+  },
+  "pendingRequests": [
+    {
+      "id": "req_1788973541818_aq9h",
+      "userToken": "usr_e8u3kg5mtuc12cg",
+      "planId": "pro",
+      "planName": "Pro Studio Monthly",
+      "amount": 999,
+      "customerName": "Abhishek kumar",
+      "customerPhone": "07011935516",
+      "utrNumber": "",
+      "screenshotUrl": "/uploads/pay_1788973541815-37302226.jpg",
+      "status": "PENDING",
+      "createdAt": "2026-09-09T17:05:41.818Z"
+    }
+  ]
+}

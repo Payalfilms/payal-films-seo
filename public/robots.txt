@@ -1,0 +1,8 @@
+# Robots.txt for Payal Films Image SEO Pro
+User-agent: *
+Allow: /
+Disallow: /api/admin/
+Disallow: /uploads/payments/
+
+# Sitemap
+Sitemap: https://payalfilms.com/sitemap.xml
