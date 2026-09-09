@@ -7,6 +7,7 @@ const archiver = require('archiver');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const sharp = require('sharp');
 require('dotenv').config();
 
 const app = express();
@@ -18,6 +19,47 @@ const PROCESSED_DIR = path.join(__dirname, 'processed');
 
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 if (!fs.existsSync(PROCESSED_DIR)) fs.mkdirSync(PROCESSED_DIR, { recursive: true });
+
+// High-Speed Web Image Optimizer & Compressor (using Sharp & Libvips)
+async function compressImageForWeb(filePath, mode = 'webp') {
+  if (!mode || mode === 'none') return null;
+
+  const baseName = path.parse(filePath).name;
+  let outExt = '.webp';
+  let pipeline = sharp(filePath).rotate();
+
+  if (mode === 'webp') {
+    outExt = '.webp';
+    pipeline = pipeline
+      .resize({ width: 1920, withoutEnlargement: true })
+      .webp({ quality: 80, effort: 4 });
+  } else if (mode === 'jpeg-hd') {
+    outExt = '.jpg';
+    pipeline = pipeline
+      .resize({ width: 1920, withoutEnlargement: true })
+      .jpeg({ quality: 82, mozjpeg: true });
+  } else if (mode === 'jpeg-medium') {
+    outExt = '.jpg';
+    pipeline = pipeline
+      .resize({ width: 1200, withoutEnlargement: true })
+      .jpeg({ quality: 75, mozjpeg: true });
+  } else {
+    return null;
+  }
+
+  const optFilename = 'opt_' + baseName + outExt;
+  const optPath = path.join(UPLOADS_DIR, optFilename);
+
+  await pipeline.toFile(optPath);
+  const optStat = fs.statSync(optPath);
+
+  return {
+    optFilename,
+    optPath,
+    outExt,
+    compressedSize: optStat.size
+  };
+}
 
 // Production Security & Performance Middlewares
 app.use(helmet({
@@ -668,7 +710,7 @@ app.post('/api/analyze-single', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Please upload an image file.' });
     }
 
-    const { apiKey, niche, language, namingStyle, studioLocation, photoCategory, userToken, studioBrandName } = req.body;
+    const { apiKey, niche, language, namingStyle, studioLocation, photoCategory, userToken, studioBrandName, compressionMode } = req.body;
     const token = userToken || req.headers['x-user-token'] || 'guest_default';
 
     // Enforce Plan & Quota Deduction
@@ -697,19 +739,43 @@ app.post('/api/analyze-single', upload.single('image'), async (req, res) => {
       analysis = generateOfflineSeoDetails(file.originalname, niche, language, namingStyle, studioLocation, photoCategory, studioBrandName);
     }
 
-    const finalFilename = `${analysis.data.seoFilename}${ext}`;
+    // Web Image Compression & Optimization (WebP / MozJPEG)
+    let downloadFileId = file.filename;
+    let finalExt = ext;
+    let compressedSize = null;
+    let savedPercent = null;
+
+    if (compressionMode && compressionMode !== 'none') {
+      try {
+        const compResult = await compressImageForWeb(file.path, compressionMode);
+        if (compResult) {
+          downloadFileId = compResult.optFilename;
+          finalExt = compResult.outExt;
+          compressedSize = compResult.compressedSize;
+          savedPercent = Math.max(0, Math.round((1 - compressedSize / file.size) * 100));
+        }
+      } catch (compErr) {
+        console.warn('Compression fallback warning:', compErr.message);
+      }
+    }
+
+    const finalFilename = `${analysis.data.seoFilename}${finalExt}`;
 
     res.json({
       success: true,
       userPlan: creditCheck.plan,
       creditsRemaining: creditCheck.creditsRemaining,
       result: {
-        fileId: file.filename,
+        fileId: downloadFileId,
+        originalFileId: file.filename,
         originalName: file.originalname,
         originalSize: file.size,
-        mimeType: file.mimetype,
-        previewUrl: `/uploads/${file.filename}`,
-        ext: ext,
+        compressedSize: compressedSize,
+        savedPercent: savedPercent,
+        isCompressed: !!compressedSize,
+        mimeType: finalExt === '.webp' ? 'image/webp' : file.mimetype,
+        previewUrl: `/uploads/${downloadFileId}`,
+        ext: finalExt,
         newFilename: finalFilename,
         ...analysis
       }
@@ -728,7 +794,7 @@ app.post('/api/analyze', upload.array('images', 200), async (req, res) => {
       return res.status(400).json({ error: 'Please upload at least one image file.' });
     }
 
-    const { apiKey, niche, language, namingStyle, studioLocation, photoCategory, studioBrandName } = req.body;
+    const { apiKey, niche, language, namingStyle, studioLocation, photoCategory, studioBrandName, compressionMode } = req.body;
     const activeApiKey = (apiKey && apiKey.trim()) || process.env.GEMINI_API_KEY;
 
     const results = [];
@@ -749,15 +815,38 @@ app.post('/api/analyze', upload.array('images', 200), async (req, res) => {
         analysis = generateOfflineSeoDetails(file.originalname, niche, language, namingStyle, studioLocation, photoCategory, studioBrandName);
       }
 
-      const finalFilename = `${analysis.data.seoFilename}${ext}`;
+      let downloadFileId = file.filename;
+      let finalExt = ext;
+      let compressedSize = null;
+      let savedPercent = null;
+
+      if (compressionMode && compressionMode !== 'none') {
+        try {
+          const compResult = await compressImageForWeb(file.path, compressionMode);
+          if (compResult) {
+            downloadFileId = compResult.optFilename;
+            finalExt = compResult.outExt;
+            compressedSize = compResult.compressedSize;
+            savedPercent = Math.max(0, Math.round((1 - compressedSize / file.size) * 100));
+          }
+        } catch (compErr) {
+          console.warn('Compression warning:', compErr.message);
+        }
+      }
+
+      const finalFilename = `${analysis.data.seoFilename}${finalExt}`;
 
       results.push({
-        fileId: file.filename,
+        fileId: downloadFileId,
+        originalFileId: file.filename,
         originalName: file.originalname,
         originalSize: file.size,
-        mimeType: file.mimetype,
-        previewUrl: `/uploads/${file.filename}`,
-        ext: ext,
+        compressedSize: compressedSize,
+        savedPercent: savedPercent,
+        isCompressed: !!compressedSize,
+        mimeType: finalExt === '.webp' ? 'image/webp' : file.mimetype,
+        previewUrl: `/uploads/${downloadFileId}`,
+        ext: finalExt,
         newFilename: finalFilename,
         ...analysis
       });

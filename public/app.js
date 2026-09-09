@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const studioLocationInput = document.getElementById('studioLocationInput');
   const studioBrandNameInput = document.getElementById('studioBrandNameInput');
   const settingsStudioNameInput = document.getElementById('settingsStudioNameInput');
+  const compressionModeSelect = document.getElementById('compressionModeSelect');
 
   // User Token & Payment State
   let userToken = localStorage.getItem('payal_user_token');
@@ -116,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedLocation = localStorage.getItem('payal_films_location') || '';
     const savedCategory = localStorage.getItem('payal_films_category') || 'Auto-Detect Indian Wedding Photography';
     const savedBrand = localStorage.getItem('studio_brand_name') || '';
+    const savedCompression = localStorage.getItem('seo_compression_mode') || 'webp';
 
     geminiApiKeyInput.value = savedKey;
     if (quickApiKeyInput) quickApiKeyInput.value = savedKey;
@@ -126,8 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (photoCategorySelect) photoCategorySelect.value = savedCategory;
     if (studioBrandNameInput) studioBrandNameInput.value = savedBrand;
     if (settingsStudioNameInput) settingsStudioNameInput.value = savedBrand;
+    if (compressionModeSelect) compressionModeSelect.value = savedCompression;
 
     checkServerConfig(savedKey);
+  }
+
+  if (compressionModeSelect) {
+    compressionModeSelect.addEventListener('change', () => {
+      localStorage.setItem('seo_compression_mode', compressionModeSelect.value);
+    });
   }
 
   // Real-time Brand Name sync
@@ -380,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const studioLocation = studioLocationInput ? studioLocationInput.value.trim() : '';
     const photoCategory = photoCategorySelect ? photoCategorySelect.value : '';
     const studioBrandName = studioBrandNameInput ? studioBrandNameInput.value.trim() : (localStorage.getItem('studio_brand_name') || '');
+    const compressionMode = compressionModeSelect ? compressionModeSelect.value : (localStorage.getItem('seo_compression_mode') || 'webp');
 
     if (studioLocationInput) localStorage.setItem('payal_films_location', studioLocation);
     if (photoCategorySelect) localStorage.setItem('payal_films_category', photoCategory);
@@ -464,6 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('studioLocation', studioLocation);
         formData.append('photoCategory', photoCategory);
         formData.append('studioBrandName', studioBrandName);
+        formData.append('compressionMode', compressionMode);
         formData.append('userToken', userToken);
 
         try {
@@ -495,11 +506,14 @@ document.addEventListener('DOMContentLoaded', () => {
             statusCell.innerHTML = '<span class="status-pill status-pill-completed">✅ Completed</span>';
           }
           if (seoNameCell) {
-            seoNameCell.innerHTML = `<span class="seo-name-cell" title="${escapeHtml(itemResult.newFilename)}">${escapeHtml(itemResult.newFilename)}</span>`;
+            const savingsBadge = itemResult.isCompressed 
+              ? ` <span style="display:inline-block; padding:1px 6px; border-radius:4px; font-size:0.75rem; background:rgba(16, 185, 129, 0.2); color:#34d399; font-weight:bold;">-${itemResult.savedPercent}%</span>`
+              : '';
+            seoNameCell.innerHTML = `<span class="seo-name-cell" title="${escapeHtml(itemResult.newFilename)}">${escapeHtml(itemResult.newFilename)}</span>${savingsBadge}`;
           }
           if (actionCell) {
             actionCell.innerHTML = `
-              <a href="/api/download/${itemResult.fileId}?newName=${encodeURIComponent(itemResult.newFilename)}" class="btn btn-primary btn-mini-action" title="Download renamed file">
+              <a href="/api/download/${itemResult.fileId}?newName=${encodeURIComponent(itemResult.newFilename)}" class="btn btn-primary btn-mini-action" title="Download ${itemResult.isCompressed ? 'web-optimized' : 'renamed'} file">
                 Download
               </a>
             `;
@@ -586,8 +600,13 @@ document.addEventListener('DOMContentLoaded', () => {
       ? '<span class="card-engine-tag tag-ai">✨ Gemini Vision AI</span>' 
       : '<span class="card-engine-tag tag-heuristic">⚡ Smart Heuristic</span>';
 
-    const fileSizeKb = Math.round(item.originalSize / 1024);
+    const origSizeKb = Math.round(item.originalSize / 1024);
+    const displaySizeKb = Math.round((item.compressedSize || item.originalSize) / 1024);
     const activeBrand = localStorage.getItem('studio_brand_name') || '';
+
+    const compressionBadge = item.isCompressed 
+      ? `<span class="card-engine-tag" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">⚡ Web-Optimized (-${item.savedPercent}%)</span>`
+      : '';
 
     // Dynamic Schema.org object using backend generated schema or personalized metadata
     const schemaObj = item.data.schemaSnippet || {
@@ -616,9 +635,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     card.innerHTML = `
       <div class="card-top-bar">
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           ${engineTag}
           ${brandBadge}
+          ${compressionBadge}
         </div>
         <div style="color: var(--text-muted); font-size: 0.8rem;">Image #${index + 1}</div>
       </div>
@@ -631,14 +651,18 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
 
           <div class="image-meta-pills">
-            <span class="meta-pill">${fileSizeKb} KB</span>
+            ${item.isCompressed 
+              ? `<span class="meta-pill" style="text-decoration: line-through; opacity: 0.6;" title="Original raw size">${origSizeKb} KB</span>
+                 <span class="meta-pill" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 600;" title="Compressed web size">⚡ ${displaySizeKb} KB</span>`
+              : `<span class="meta-pill">${origSizeKb} KB</span>`
+            }
             <span class="meta-pill">${ext.toUpperCase().replace('.', '')}</span>
             <span class="meta-pill">${item.data.category || 'General'}</span>
           </div>
 
           <button class="btn btn-primary btn-download-single" id="dlBtn-${index}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Download Renamed Image
+            Download ${item.isCompressed ? 'Web Image' : 'Renamed Image'}
           </button>
         </div>
 
