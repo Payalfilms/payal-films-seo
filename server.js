@@ -451,20 +451,34 @@ app.post('/api/payment/generate-qr', async (req, res) => {
 // Submit Payment Proof & Generate WhatsApp Redirection
 app.post('/api/payment/submit-whatsapp-proof', upload.single('screenshot'), (req, res) => {
   try {
-    const { planId, userToken, customerName, customerPhone, utrNumber } = req.body;
+    const { planId, userToken, customerName, customerPhone, customerUtr, utrNumber } = req.body;
     if (!planId || !userToken) {
       return res.status(400).json({ error: 'planId and userToken are required.' });
     }
 
+    const trimmedName = (customerName || '').trim();
+    const cleanPhone = (customerPhone || '').replace(/\D/g, '');
+
+    if (!trimmedName || trimmedName.length < 2) {
+      return res.status(400).json({ error: 'Full Name is required (minimum 2 characters).' });
+    }
+    if (!cleanPhone || cleanPhone.length < 10) {
+      return res.status(400).json({ error: 'A valid 10-digit WhatsApp number is required.' });
+    }
+
     const file = req.file;
-    const screenshotUrl = file ? `/uploads/${file.filename}` : '';
+    if (!file) {
+      return res.status(400).json({ error: 'Payment screenshot receipt is required.' });
+    }
+    const screenshotUrl = `/uploads/${file.filename}`;
+    const effectiveUtr = (customerUtr || utrNumber || '').trim();
 
     const request = payments.createPendingRequest({
       userToken,
       planId,
-      customerName,
-      customerPhone,
-      utrNumber,
+      customerName: trimmedName,
+      customerPhone: cleanPhone,
+      utrNumber: effectiveUtr,
       screenshotUrl
     });
 
