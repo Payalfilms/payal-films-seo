@@ -923,6 +923,12 @@
           </div>
         </div>
 
+        <!-- Pricing Restore Link Hint -->
+        <div class="pricing-restore-bar">
+          <span>Already purchased a plan or switched devices?</span>
+          <button type="button" class="btn-restore-link" id="pricingRestoreLink">🔄 Restore Account with Token or Phone</button>
+        </div>
+
         <!-- Step 2: Dynamic UPI QR Code & Payment Verification Section -->
         <div class="upi-payment-section" id="upiPaymentSection" style="display: none;">
           <div class="upi-section-header">
@@ -1109,6 +1115,41 @@
       </div>
 
       <div class="modal-body">
+        <!-- Studio Account & Plan Identity Card -->
+        <div class="user-account-card">
+          <div class="account-card-header">
+            <div class="account-card-title">
+              <span class="account-icon">👤</span>
+              <div>
+                <h4>Studio Account & Active Plan</h4>
+                <p>Track your credits or login to this plan on another computer/phone</p>
+              </div>
+            </div>
+            <span class="account-plan-badge" id="settingsAccountPlanBadge">10 Free Credits</span>
+          </div>
+
+          <div class="account-details-grid">
+            <div class="account-detail-item">
+              <span class="detail-label">Your Permanent Account ID / Token:</span>
+              <div class="token-action-row">
+                <code id="settingsUserTokenText">usr_loading...</code>
+                <button type="button" class="btn btn-secondary btn-sm" id="copyUserTokenBtn" title="Copy User Token">📋 Copy</button>
+              </div>
+              <small class="form-help">Is Token ko save rakhein. Is se aap kisi bhi device par apna account restore kar sakte hain.</small>
+            </div>
+          </div>
+
+          <!-- Restore / Login Existing Account -->
+          <div class="account-restore-box">
+            <label for="restoreAccountInput"><strong>🔄 Restore Account / Switch Device:</strong></label>
+            <div class="restore-input-row">
+              <input type="text" id="restoreAccountInput" placeholder="Enter Token (usr_xxx) or WhatsApp Phone No." />
+              <button type="button" class="btn btn-primary btn-sm" id="restoreAccountBtn">Login / Restore</button>
+            </div>
+            <small class="form-help">Agar aapne doosre phone/PC par plan liya tha ya browser cache clear ho gaya, toh Token ya WhatsApp number daal kar restore karein.</small>
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="settingsStudioNameInput">
             <span>Studio / Brand / Website Name</span>

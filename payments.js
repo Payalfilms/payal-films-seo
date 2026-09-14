@@ -375,8 +375,66 @@ function createPendingRequest({ userToken, planId, customerName, customerPhone, 
     db.pendingRequests = db.pendingRequests.slice(0, 150);
   }
 
+  // Also attach customer contact to the user record for account recovery
+  if (!db.users[userToken]) {
+    getUser(userToken);
+  }
+  if (db.users[userToken]) {
+    if (customerName) db.users[userToken].customerName = customerName;
+    if (customerPhone) db.users[userToken].customerPhone = customerPhone;
+  }
+
   saveDb(db);
   return request;
+}
+
+// Find user by User Token or Phone Number (for multi-device account restore)
+function findUserByTokenOrPhone(query) {
+  if (!query) return null;
+  const clean = query.trim();
+  const db = loadDb();
+
+  // 1. Direct match by userToken
+  if (db.users[clean]) {
+    return db.users[clean];
+  }
+
+  // Case-insensitive token match
+  const lowerQuery = clean.toLowerCase();
+  for (const token in db.users) {
+    if (token.toLowerCase() === lowerQuery) {
+      return db.users[token];
+    }
+  }
+
+  // 2. Match by phone number (last 10 digits)
+  const cleanPhone = clean.replace(/\D/g, '');
+  if (cleanPhone.length >= 10) {
+    const last10 = cleanPhone.slice(-10);
+
+    // Check users in db
+    for (const token in db.users) {
+      const u = db.users[token];
+      if (u.customerPhone) {
+        const uPhone = u.customerPhone.replace(/\D/g, '');
+        if (uPhone.endsWith(last10)) {
+          return u;
+        }
+      }
+    }
+
+    // Check pending requests to see if phone was used there
+    const foundReq = db.pendingRequests.find(r => {
+      if (!r.customerPhone) return false;
+      const rPhone = r.customerPhone.replace(/\D/g, '');
+      return rPhone.endsWith(last10);
+    });
+    if (foundReq && db.users[foundReq.userToken]) {
+      return db.users[foundReq.userToken];
+    }
+  }
+
+  return null;
 }
 
 // List all requests for Admin
@@ -464,6 +522,7 @@ module.exports = {
   createPendingRequest,
   getPendingRequests,
   approveRequest,
-  rejectRequest
+  rejectRequest,
+  findUserByTokenOrPhone
 };
 

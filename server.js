@@ -404,6 +404,30 @@ app.get('/api/user/status', (req, res) => {
   res.json({ success: true, user });
 });
 
+// Restore / Switch User Account by Token or Phone (Multi-device login)
+app.post('/api/user/restore-account', (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query || !query.trim()) {
+      return res.status(400).json({ success: false, error: 'Please provide a User Token (usr_xxx) or WhatsApp Phone number.' });
+    }
+    const user = payments.findUserByTokenOrPhone(query.trim());
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'No active account found matching this Token or Phone Number. Please check and try again, or contact Payal Films Studio.'
+      });
+    }
+    res.json({
+      success: true,
+      user,
+      message: `Account found! Switched to ${user.userToken} (${user.plan.toUpperCase()} plan, ${user.plan === 'lifetime' ? 'Unlimited' : user.creditsRemaining + ' credits'}).`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Get Pricing Plans
 app.get('/api/payment/plans', (req, res) => {
   res.json({ success: true, plans: payments.PLANS });

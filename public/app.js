@@ -55,6 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedScreenshotFile = null;
   let currentUserData = null;
 
+  // Studio Account & Identity Elements
+  const settingsUserTokenText = document.getElementById('settingsUserTokenText');
+  const settingsAccountPlanBadge = document.getElementById('settingsAccountPlanBadge');
+  const copyUserTokenBtn = document.getElementById('copyUserTokenBtn');
+  const restoreAccountInput = document.getElementById('restoreAccountInput');
+  const restoreAccountBtn = document.getElementById('restoreAccountBtn');
+  const pricingRestoreLink = document.getElementById('pricingRestoreLink');
+
   // Payment DOM Elements
   const userCreditsBadge = document.getElementById('userCreditsBadge');
   const creditCountText = document.getElementById('creditCountText');
@@ -273,10 +281,103 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Studio settings saved!', 'success');
   }
 
-  openSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
-  closeSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'none');
-  cancelSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'none');
-  saveSettingsBtn.addEventListener('click', saveSettings);
+  function updateAccountDisplay() {
+    if (settingsUserTokenText) settingsUserTokenText.textContent = userToken;
+    if (settingsAccountPlanBadge) {
+      settingsAccountPlanBadge.className = 'account-plan-badge';
+      if (currentUserData) {
+        const { plan, creditsRemaining } = currentUserData;
+        if (plan === 'lifetime') {
+          settingsAccountPlanBadge.textContent = '👑 VIP Unlimited';
+          settingsAccountPlanBadge.classList.add('vip');
+        } else if (plan === 'pro') {
+          settingsAccountPlanBadge.textContent = `Pro (${creditsRemaining} Credits)`;
+          settingsAccountPlanBadge.classList.add('pro');
+        } else if (plan === 'starter') {
+          settingsAccountPlanBadge.textContent = `Starter (${creditsRemaining} Credits)`;
+          settingsAccountPlanBadge.classList.add('starter');
+        } else {
+          settingsAccountPlanBadge.textContent = `${creditsRemaining} Free Credits`;
+        }
+      } else {
+        settingsAccountPlanBadge.textContent = 'Free (10 Credits)';
+      }
+    }
+  }
+
+  function openSettingsModal() {
+    updateAccountDisplay();
+    if (settingsModal) settingsModal.style.display = 'flex';
+  }
+
+  function closeSettingsModal() {
+    if (settingsModal) settingsModal.style.display = 'none';
+  }
+
+  if (openSettingsBtn) openSettingsBtn.addEventListener('click', openSettingsModal);
+  if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsModal);
+  if (cancelSettingsBtn) cancelSettingsBtn.addEventListener('click', closeSettingsModal);
+  if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', saveSettings);
+
+  // Copy User Token
+  if (copyUserTokenBtn) {
+    copyUserTokenBtn.addEventListener('click', () => {
+      copyToClipboard(userToken, 'Account Token copied! Is token ko save rakhein.');
+    });
+  }
+
+  // Restore Account / Switch Device
+  if (restoreAccountBtn && restoreAccountInput) {
+    restoreAccountBtn.addEventListener('click', async () => {
+      const q = restoreAccountInput.value.trim();
+      if (!q) {
+        showToast('Please enter your User Token (usr_xxx) or WhatsApp Phone Number', 'error');
+        return;
+      }
+
+      restoreAccountBtn.disabled = true;
+      restoreAccountBtn.textContent = 'Verifying...';
+
+      try {
+        const res = await fetch('/api/user/restore-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Account restore failed');
+        }
+
+        userToken = data.user.userToken;
+        localStorage.setItem('payal_user_token', userToken);
+        currentUserData = data.user;
+
+        await fetchUserStatus();
+        updateAccountDisplay();
+        restoreAccountInput.value = '';
+
+        showToast(`🎉 Welcome back! Account restored: ${data.user.plan.toUpperCase()} Plan active.`, 'success');
+      } catch (err) {
+        showToast(`Error: ${err.message}`, 'error');
+      } finally {
+        restoreAccountBtn.disabled = false;
+        restoreAccountBtn.textContent = 'Login / Restore';
+      }
+    });
+  }
+
+  // Pricing Modal: Quick switch to Restore Box
+  if (pricingRestoreLink) {
+    pricingRestoreLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      closePricingModal();
+      openSettingsModal();
+      setTimeout(() => {
+        if (restoreAccountInput) restoreAccountInput.focus();
+      }, 250);
+    });
+  }
 
   // --------------------------------------------------
   // FILE SELECTION & DRAG-AND-DROP
@@ -995,6 +1096,8 @@ ${escapeHtml(schemaString)}
         lifetimeBtn.textContent = '✅ VIP Active';
         lifetimeBtn.disabled = true;
       }
+
+      updateAccountDisplay();
     } catch (e) {
       console.warn('Could not fetch user status:', e);
     }
