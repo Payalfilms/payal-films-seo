@@ -1434,6 +1434,50 @@ ${escapeHtml(schemaString)}
     });
   }
 
+  // --------------------------------------------------
+  // SECRET ADMIN ACCESS (Hidden from public view)
+  // --------------------------------------------------
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAdminQuery = urlParams.has('admin') || window.location.hash === '#admin';
+
+  // If accessed via secret URL or already logged in, show button and auto-open
+  if (isAdminQuery || currentAdminSecret) {
+    if (openAdminBtn) openAdminBtn.style.display = 'inline-flex';
+    if (isAdminQuery) {
+      setTimeout(openAdminModal, 300);
+    }
+  }
+
+  // Secret Shortcut: Ctrl + Shift + A
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
+      e.preventDefault();
+      if (openAdminBtn) openAdminBtn.style.display = 'inline-flex';
+      openAdminModal();
+    }
+  });
+
+  // Secret Footer 3-Tap Trigger
+  const secretAdminTrigger = document.getElementById('secretAdminTrigger');
+  let secretClickCount = 0;
+  let secretClickTimer = null;
+  if (secretAdminTrigger) {
+    secretAdminTrigger.addEventListener('click', () => {
+      secretClickCount++;
+      clearTimeout(secretClickTimer);
+      if (secretClickCount >= 3) {
+        secretClickCount = 0;
+        if (openAdminBtn) openAdminBtn.style.display = 'inline-flex';
+        openAdminModal();
+        showToast('🔑 Studio Admin Mode Activated', 'info');
+      } else {
+        secretClickTimer = setTimeout(() => {
+          secretClickCount = 0;
+        }, 1500);
+      }
+    });
+  }
+
   if (adminLoginBtn && adminSecretInput) {
     adminLoginBtn.addEventListener('click', async () => {
       const secret = adminSecretInput.value.trim();
@@ -1487,6 +1531,10 @@ ${escapeHtml(schemaString)}
       if (adminAuthBox) adminAuthBox.style.display = 'block';
       if (adminContentBox) adminContentBox.style.display = 'none';
       if (adminSecretInput) adminSecretInput.value = '';
+      if (!isAdminQuery && openAdminBtn) {
+        openAdminBtn.style.display = 'none';
+      }
+      closeAdminModal();
       showToast('Admin Panel Logged Out & Locked', 'info');
     });
   }
