@@ -471,8 +471,7 @@ app.post('/api/payment/submit-whatsapp-proof', upload.single('screenshot'), (req
     const waNumber = (process.env.WHATSAPP_NUMBER || '').replace(/[^0-9]/g, '');
     const adminSecret = process.env.ADMIN_SECRET || 'payalfilms123';
     const host = req.get('host');
-    const protocol = req.protocol;
-    const quickApproveUrl = `${protocol}://${host}/api/admin/quick-approve?token=${encodeURIComponent(userToken)}&plan=${encodeURIComponent(planId)}&secret=${encodeURIComponent(adminSecret)}`;
+    const quickApproveUrl = `https://${host}/api/admin/quick-approve?token=${encodeURIComponent(userToken)}&plan=${encodeURIComponent(planId)}&secret=${encodeURIComponent(adminSecret)}`;
 
     const messageText = `Namaste Payal Films Photography! 📸\n\nMaine abhi Payment kar diya hai. Kripya mera SEO Batch Plan approve karein:\n\n📋 Plan: ${request.planName}\n💰 Amount: ₹${request.amount}\n👤 Customer Name: ${request.customerName}\n📞 Phone: ${request.customerPhone || 'N/A'}\n🆔 User Token: ${request.userToken}\n🔢 UTR/UPI Ref: ${request.utrNumber || 'Attached in Screenshot'}\n\n⚡ Quick 1-Click Approve Link (Admin only):\n${quickApproveUrl}\n\n(Maine payment receipt ka screenshot is message me attach kiya hai) 👇`;
 
@@ -502,7 +501,7 @@ app.get('/api/admin/pending-requests', (req, res) => {
   res.json({ success: true, requests });
 });
 
-// Admin: Approve request
+// Admin: Approve Request by ID
 app.post('/api/admin/approve-request', (req, res) => {
   try {
     const { requestId, secret } = req.body;
@@ -518,7 +517,7 @@ app.post('/api/admin/approve-request', (req, res) => {
   }
 });
 
-// Admin: Reject request
+// Admin: Reject Request by ID
 app.post('/api/admin/reject-request', (req, res) => {
   try {
     const { requestId, secret, reason } = req.body;
@@ -534,7 +533,7 @@ app.post('/api/admin/reject-request', (req, res) => {
   }
 });
 
-// Admin: Manual Direct Upgrade by Token
+// Admin: Direct Manual User Upgrade
 app.post('/api/admin/manual-upgrade', (req, res) => {
   try {
     const { userToken, planId, secret } = req.body;
@@ -550,7 +549,7 @@ app.post('/api/admin/manual-upgrade', (req, res) => {
   }
 });
 
-// Admin: 1-Click Quick Approval URL (From WhatsApp link on Mobile/PC)
+// Admin: Quick Approval Step 1 — Confirmation Screen (Pehle puchega, fir YES karne par hi approve hoga)
 app.get('/api/admin/quick-approve', (req, res) => {
   const { token, plan, secret } = req.query;
   const expectedSecret = process.env.ADMIN_SECRET || 'payalfilms123';
@@ -568,9 +567,304 @@ app.get('/api/admin/quick-approve', (req, res) => {
     `);
   }
 
+  const user = payments.getUser(token);
+  const pendingRequests = payments.getPendingRequests();
+  const reqItem = pendingRequests.find(r => r.userToken === token) || {};
+  const customerName = reqItem.customerName || user.customerName || 'Studio Client';
+  const customerPhone = reqItem.customerPhone || user.customerPhone || 'N/A';
+  const utrNumber = reqItem.utrNumber || 'Attached in Screenshot';
+  const planInfo = payments.PLANS[plan] || { name: plan, price: '---', credits: '---' };
+  const isAlreadyApproved = (user.plan === plan || user.plan === 'lifetime') && user.plan !== 'free';
+
+  if (isAlreadyApproved) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Already Approved - Payal Films</title>
+        <style>
+          body { font-family: 'Segoe UI', sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+          .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 32px 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+          .badge { background: #10b981; color: #fff; width: 64px; height: 64px; border-radius: 50%; line-height: 64px; font-size: 32px; margin: 0 auto 16px; }
+          h2 { color: #34d399; margin: 0 0 10px; }
+          .btn { display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin-top: 16px; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="badge">✓</div>
+          <h2>Already Approved!</h2>
+          <p>Ye plan pehle se hi active hai: <strong>${planInfo.name}</strong></p>
+          <p style="color: #94a3b8; font-size: 0.9rem;">Customer: ${customerName} (${customerPhone})</p>
+          <a href="/" class="btn">Open Payal Films Studio &rarr;</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  // Render Confirmation Screen asking Studio Owner
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Confirm Payment Approval - Payal Films</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          background: #0b0f19;
+          color: #f8fafc;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          padding: 20px 16px;
+        }
+        .card {
+          background: #1e293b;
+          border: 1px solid #334155;
+          border-radius: 20px;
+          padding: 32px 24px;
+          max-width: 500px;
+          width: 100%;
+          box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 24px;
+        }
+        .icon-wrap {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: rgba(245, 158, 11, 0.15);
+          border: 2px solid #f59e0b;
+          color: #fbbf24;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 28px;
+          margin: 0 auto 12px;
+        }
+        h2 {
+          font-size: 1.4rem;
+          color: #ffffff;
+          margin-bottom: 6px;
+        }
+        .subtitle {
+          font-size: 0.88rem;
+          color: #94a3b8;
+        }
+        .details-box {
+          background: #0f172a;
+          border: 1px solid #334155;
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 24px;
+        }
+        .detail-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          font-size: 0.9rem;
+        }
+        .detail-row:last-child {
+          border-bottom: none;
+        }
+        .label {
+          color: #94a3b8;
+        }
+        .val {
+          font-weight: 600;
+          color: #f1f5f9;
+        }
+        .val-price {
+          color: #34d399;
+          font-size: 1.15rem;
+          font-weight: 800;
+        }
+        .val-token {
+          font-family: monospace;
+          color: #67e8f9;
+          font-size: 0.8rem;
+        }
+        .confirm-prompt {
+          background: rgba(99, 102, 241, 0.12);
+          border: 1px solid rgba(99, 102, 241, 0.3);
+          border-radius: 10px;
+          padding: 12px 14px;
+          margin-bottom: 24px;
+          font-size: 0.88rem;
+          color: #c7d2fe;
+          text-align: center;
+          line-height: 1.4;
+        }
+        .btn-action {
+          display: block;
+          width: 100%;
+          padding: 14px;
+          border-radius: 10px;
+          font-size: 1rem;
+          font-weight: 700;
+          cursor: pointer;
+          border: none;
+          transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn-action:active {
+          transform: scale(0.98);
+        }
+        .btn-approve {
+          background: linear-gradient(135deg, #10b981, #059669);
+          color: #ffffff;
+          margin-bottom: 12px;
+          box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+        .btn-approve:hover {
+          background: #10b981;
+        }
+        .btn-reject {
+          background: rgba(239, 68, 68, 0.15);
+          border: 1px solid #ef4444;
+          color: #fca5a5;
+        }
+        .btn-reject:hover {
+          background: rgba(239, 68, 68, 0.25);
+          color: #ffffff;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div class="icon-wrap">👑</div>
+          <h2>Studio Owner Approval</h2>
+          <p class="subtitle">Payal Films Manual Verification Step</p>
+        </div>
+
+        <div class="details-box">
+          <div class="detail-row">
+            <span class="label">Customer Name:</span>
+            <span class="val">${customerName}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">WhatsApp Number:</span>
+            <span class="val">${customerPhone}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Selected Plan:</span>
+            <span class="val">${planInfo.name}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Amount:</span>
+            <span class="val-price">₹${planInfo.price}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Quota to Allow:</span>
+            <span class="val">${planInfo.unlimited ? 'Unlimited Forever' : planInfo.credits + ' Images'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">UTR / Ref:</span>
+            <span class="val" style="font-size:0.82rem;">${utrNumber}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">User Token:</span>
+            <span class="val-token">${token}</span>
+          </div>
+        </div>
+
+        <div class="confirm-prompt">
+          ⚠️ <strong>Confirmation Required:</strong><br/>
+          Kya aapne apne Bank / UPI app me ₹${planInfo.price} receive check kar liya hai?
+        </div>
+
+        <form method="POST" action="/api/admin/quick-approve">
+          <input type="hidden" name="token" value="${token}" />
+          <input type="hidden" name="plan" value="${plan}" />
+          <input type="hidden" name="secret" value="${secret}" />
+          <input type="hidden" name="action" value="approve" />
+          <button type="submit" class="btn-action btn-approve">
+            ✅ Haan, Payment Mil Gaya — Approve Karein
+          </button>
+        </form>
+
+        <form method="POST" action="/api/admin/quick-approve">
+          <input type="hidden" name="token" value="${token}" />
+          <input type="hidden" name="plan" value="${plan}" />
+          <input type="hidden" name="secret" value="${secret}" />
+          <input type="hidden" name="action" value="reject" />
+          <button type="submit" class="btn-action btn-reject">
+            ❌ Nahi, Cancel / Reject Karein
+          </button>
+        </form>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
+// Admin: Quick Approval Step 2 — Process Action when Studio Owner Clicks YES / CANCEL
+app.post('/api/admin/quick-approve', (req, res) => {
+  const { token, plan, secret, action } = req.body;
+  const expectedSecret = process.env.ADMIN_SECRET || 'payalfilms123';
+
+  if (secret !== expectedSecret) {
+    return res.status(403).send(`<h2>Unauthorized Access</h2>`);
+  }
+
+  // If Studio Owner chose to Reject / Cancel
+  if (action === 'reject') {
+    const pendingRequests = payments.getPendingRequests();
+    const reqItem = pendingRequests.find(r => r.userToken === token && r.status === 'PENDING');
+    if (reqItem) {
+      try { payments.rejectRequest(reqItem.id, 'Cancelled by studio owner'); } catch(e) {}
+    }
+
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Request Cancelled - Payal Films</title>
+        <style>
+          body { font-family: -apple-system, sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
+          .card { background: #1e293b; border: 1px solid #ef4444; border-radius: 16px; padding: 32px 24px; max-width: 480px; width: 100%; }
+          .badge { width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: #ef4444; line-height: 64px; font-size: 32px; margin: 0 auto 16px; }
+          h2 { color: #f87171; margin-bottom: 8px; }
+          p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 20px; }
+          .btn { display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="badge">✕</div>
+          <h2>Request Cancelled</h2>
+          <p>Aapne is payment approval ko cancel kar diya hai. User account upgrade nahi kiya gaya.</p>
+          <a href="/" class="btn">Open Payal Films Studio &rarr;</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  // If Studio Owner Clicked YES (Approve)
   try {
     const user = payments.upgradeUser(token, plan);
     const planInfo = payments.PLANS[plan] || { name: plan };
+
+    // Also mark pending request approved if present
+    const pendingRequests = payments.getPendingRequests();
+    const reqItem = pendingRequests.find(r => r.userToken === token && r.status === 'PENDING');
+    if (reqItem) {
+      try { payments.approveRequest(reqItem.id); } catch(e) {}
+    }
 
     res.send(`
       <!DOCTYPE html>
@@ -580,30 +874,30 @@ app.get('/api/admin/quick-approve', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Payment Approved - Payal Films Admin</title>
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-          .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 32px 28px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-          .badge { background: #10b981; color: #fff; display: inline-block; width: 64px; height: 64px; border-radius: 50%; line-height: 64px; font-size: 32px; margin-bottom: 16px; }
+          body { font-family: -apple-system, sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+          .card { background: #1e293b; border: 1px solid #10b981; border-radius: 20px; padding: 36px 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 24px 48px rgba(16, 185, 129, 0.15); }
+          .badge { background: #10b981; color: #fff; width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 34px; margin: 0 auto 18px; box-shadow: 0 0 24px rgba(16, 185, 129, 0.5); }
           h2 { margin: 0 0 10px; font-size: 1.5rem; color: #34d399; }
           p { color: #94a3b8; font-size: 0.95rem; margin: 6px 0; }
-          .details { background: #0f172a; border-radius: 10px; padding: 14px; margin: 20px 0; text-align: left; font-size: 0.88rem; }
-          .details div { margin: 6px 0; display: flex; justify-content: space-between; }
+          .details { background: #0f172a; border-radius: 12px; padding: 16px; margin: 20px 0; text-align: left; font-size: 0.9rem; }
+          .details div { margin: 8px 0; display: flex; justify-content: space-between; }
           .details span { color: #94a3b8; }
           .details strong { color: #f1f5f9; }
-          .btn-home { display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+          .btn-home { display: inline-block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin-top: 14px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
         </style>
       </head>
       <body>
         <div class="card">
           <div class="badge">✓</div>
-          <h2>Payment Approved!</h2>
-          <p>User account has been activated instantly.</p>
+          <h2>Mubarak Ho! Payment Approved</h2>
+          <p>User ka account abhi instantly unlock aur upgrade kar diya gaya hai.</p>
           <div class="details">
-            <div><span>User Token:</span> <strong>${token}</strong></div>
-            <div><span>Activated Plan:</span> <strong>${planInfo.name}</strong></div>
-            <div><span>New Quota:</span> <strong>${user.creditsRemaining === null || plan === 'lifetime' ? 'Unlimited Forever' : user.creditsRemaining + ' Credits'}</strong></div>
-            <div><span>Status:</span> <strong style="color:#10b981;">ACTIVE</strong></div>
+            <div><span>Customer:</span> <strong>${user.customerName || 'Studio Client'}</strong></div>
+            <div><span>Activated Plan:</span> <strong style="color: #34d399;">${planInfo.name}</strong></div>
+            <div><span>New Quota:</span> <strong>${user.creditsRemaining === null || plan === 'lifetime' ? '👑 Unlimited Forever' : user.creditsRemaining + ' Credits'}</strong></div>
+            <div><span>Status:</span> <strong style="color:#10b981;">ACTIVE NOW</strong></div>
           </div>
-          <p style="font-size:0.8rem; color:#64748b;">Customer can now continue batch processing 100+ images without restriction.</p>
+          <p style="font-size:0.82rem; color:#64748b;">Customer ke device par screen automatically unlock ho chuki hai.</p>
           <a href="/" class="btn-home">Go to Image SEO Studio &rarr;</a>
         </div>
       </body>
