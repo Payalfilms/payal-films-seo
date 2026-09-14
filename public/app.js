@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminLoginBtn = document.getElementById('adminLoginBtn');
   const pendingRequestsCountBadge = document.getElementById('pendingRequestsCountBadge');
   const refreshAdminBtn = document.getElementById('refreshAdminBtn');
+  const adminLogoutBtn = document.getElementById('adminLogoutBtn');
   const adminRequestsTableBody = document.getElementById('adminRequestsTableBody');
   const manualUserTokenInput = document.getElementById('manualUserTokenInput');
   const manualPlanSelect = document.getElementById('manualPlanSelect');
@@ -1375,6 +1376,17 @@ ${escapeHtml(schemaString)}
   }
 
   if (refreshAdminBtn) refreshAdminBtn.addEventListener('click', loadAdminRequests);
+
+  if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener('click', () => {
+      currentAdminSecret = '';
+      sessionStorage.removeItem('payal_admin_secret');
+      if (adminAuthBox) adminAuthBox.style.display = 'block';
+      if (adminContentBox) adminContentBox.style.display = 'none';
+      if (adminSecretInput) adminSecretInput.value = '';
+      showToast('Admin Panel Logged Out & Locked', 'info');
+    });
+  }
 
   function renderAdminRequests(requests) {
     const pending = requests.filter(r => r.status === 'PENDING');

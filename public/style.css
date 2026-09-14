@@ -2122,6 +2122,12 @@ body {
   font-weight: 700;
 }
 
+#adminLogoutBtn:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
 .admin-table-container {
   max-height: 380px;
   overflow-y: auto;

@@ -1040,7 +1040,7 @@
           <h4>Studio Owner Authorization Required</h4>
           <p>Manual Approval Panel ko access karne ke liye apna Admin Secret Key enter karein:</p>
           <div class="admin-auth-row">
-            <input type="password" id="adminSecretInput" placeholder="Enter Admin Secret (Default: payalfilms123)" />
+            <input type="password" id="adminSecretInput" placeholder="Enter Studio Admin Secret Key" autocomplete="off" />
             <button class="btn btn-primary" id="adminLoginBtn">Unlock Panel</button>
           </div>
         </div>
@@ -1049,7 +1049,10 @@
         <div class="admin-content-box" id="adminContentBox" style="display: none;">
           <div class="admin-toolbar">
             <span class="admin-stat-pill" id="pendingRequestsCountBadge">0 Pending Requests</span>
-            <button class="btn btn-secondary btn-sm" id="refreshAdminBtn">🔄 Refresh List</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="btn btn-secondary btn-sm" id="refreshAdminBtn">🔄 Refresh List</button>
+              <button class="btn btn-secondary btn-sm" id="adminLogoutBtn" style="border-color: #ef4444; color: #fca5a5;">🔒 Lock / Logout</button>
+            </div>
           </div>
 
           <!-- Pending Requests Table -->
