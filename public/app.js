@@ -956,6 +956,9 @@ ${escapeHtml(schemaString)}
       currentUserData = data.user;
       const { plan, creditsRemaining } = currentUserData;
 
+      const mobileCreditsBadge = document.getElementById('mobileCreditsBadge');
+      const mobileCreditCountText = document.getElementById('mobileCreditCountText');
+
       if (userCreditsBadge && creditCountText) {
         userCreditsBadge.classList.remove('vip', 'exhausted');
 
@@ -972,6 +975,19 @@ ${escapeHtml(schemaString)}
         }
       }
 
+      if (mobileCreditsBadge && mobileCreditCountText) {
+        mobileCreditsBadge.classList.remove('vip', 'exhausted');
+        if (plan === 'lifetime') {
+          mobileCreditCountText.textContent = '👑 VIP';
+          mobileCreditsBadge.classList.add('vip');
+        } else if (creditsRemaining <= 0) {
+          mobileCreditCountText.textContent = '0 Free';
+          mobileCreditsBadge.classList.add('exhausted');
+        } else {
+          mobileCreditCountText.textContent = `${creditsRemaining} Free`;
+        }
+      }
+
       // Update button labels in pricing modal if user is on a plan
       const lifetimeBtn = document.querySelector('[data-select-plan="lifetime"]');
       if (lifetimeBtn && plan === 'lifetime') {
@@ -981,6 +997,44 @@ ${escapeHtml(schemaString)}
     } catch (e) {
       console.warn('Could not fetch user status:', e);
     }
+  }
+
+  // Mobile Navigation Drawer Toggle & Outside Click
+  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  const headerActions = document.getElementById('headerActions');
+  const mobileCreditsBadge = document.getElementById('mobileCreditsBadge');
+
+  if (mobileMenuToggle && headerActions) {
+    mobileMenuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = headerActions.classList.toggle('mobile-open');
+      mobileMenuToggle.classList.toggle('active', isOpen);
+      mobileMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (headerActions.classList.contains('mobile-open') &&
+          !headerActions.contains(e.target) &&
+          !mobileMenuToggle.contains(e.target)) {
+        headerActions.classList.remove('mobile-open');
+        mobileMenuToggle.classList.remove('active');
+        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Auto-close menu when tapping action buttons inside it
+    headerActions.querySelectorAll('button, .user-credits-badge').forEach(btn => {
+      btn.addEventListener('click', () => {
+        headerActions.classList.remove('mobile-open');
+        mobileMenuToggle.classList.remove('active');
+        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  if (mobileCreditsBadge) {
+    mobileCreditsBadge.addEventListener('click', openPricingModal);
   }
 
   // Open / Close Pricing Modal

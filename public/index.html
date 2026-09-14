@@ -182,19 +182,33 @@
     <div class="container nav-container">
       <div class="brand">
         <div class="brand-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
             <circle cx="12" cy="13" r="4"></circle>
           </svg>
         </div>
         <div class="brand-text">
           <h1>Payal<span>Films</span> SEO</h1>
-          <p>AI Photography Brain & Auto-Renamer</p>
+          <p class="brand-subtitle">AI Photography Brain &amp; Auto-Renamer</p>
         </div>
       </div>
 
-      <div class="header-actions">
-        <div class="user-credits-badge" id="userCreditsBadge" title="Remaining Image Quota">
+      <!-- Mobile Quick Actions & Hamburger -->
+      <div class="header-mobile-bar">
+        <div class="user-credits-badge mobile-credits-pill" id="mobileCreditsBadge" title="Remaining Image Quota">
+          <span class="credit-bolt">⚡</span>
+          <span id="mobileCreditCountText">10 Free</span>
+        </div>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" title="Open Menu">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      </div>
+
+      <!-- Header Navigation Actions (Desktop inline, Mobile slide-down drawer) -->
+      <div class="header-actions" id="headerActions">
+        <div class="user-credits-badge desktop-credits-badge" id="userCreditsBadge" title="Remaining Image Quota">
           <span class="credit-bolt">⚡</span>
           <span id="creditCountText">10 Free Credits</span>
         </div>
