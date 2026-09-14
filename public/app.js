@@ -307,7 +307,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openSettingsModal() {
     updateAccountDisplay();
-    if (settingsModal) settingsModal.style.display = 'flex';
+    if (settingsModal) {
+      settingsModal.style.display = 'flex';
+      const body = settingsModal.querySelector('.modal-body');
+      if (body) body.scrollTop = 0;
+    }
   }
 
   function closeSettingsModal() {
@@ -1042,7 +1046,11 @@ ${escapeHtml(schemaString)}
   function openPricingModal() {
     if (pricingPlansGrid) pricingPlansGrid.style.display = 'grid';
     if (upiPaymentSection) upiPaymentSection.style.display = 'none';
-    if (pricingModal) pricingModal.style.display = 'flex';
+    if (pricingModal) {
+      pricingModal.style.display = 'flex';
+      const body = pricingModal.querySelector('.modal-body');
+      if (body) body.scrollTop = 0;
+    }
   }
 
   function closePricingModal() {
@@ -1410,6 +1418,8 @@ ${escapeHtml(schemaString)}
   function openAdminModal() {
     if (!adminModal) return;
     adminModal.style.display = 'flex';
+    const body = adminModal.querySelector('.modal-body');
+    if (body) body.scrollTop = 0;
 
     if (currentAdminSecret) {
       if (adminAuthBox) adminAuthBox.style.display = 'none';
