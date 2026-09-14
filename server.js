@@ -549,6 +549,22 @@ app.post('/api/admin/manual-upgrade', (req, res) => {
   }
 });
 
+// Admin: Revoke User Plan and Reset Credits to 0
+app.post('/api/admin/revoke-user', (req, res) => {
+  try {
+    const { userToken, secret, reason } = req.body;
+    const expectedSecret = process.env.ADMIN_SECRET || 'payalfilms123';
+    if (secret !== expectedSecret) {
+      return res.status(403).json({ error: 'Invalid admin secret password.' });
+    }
+
+    const user = payments.revokeUserPlan(userToken, reason || 'Plan cancelled by admin');
+    res.json({ success: true, user, message: `User ${userToken} plan revoked and credits set to 0.` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Admin: Quick Approval Step 1 — Confirmation Screen (Pehle puchega, fir YES karne par hi approve hoga)
 app.get('/api/admin/quick-approve', (req, res) => {
   const { token, plan, secret } = req.query;
@@ -824,6 +840,8 @@ app.post('/api/admin/quick-approve', (req, res) => {
     const reqItem = pendingRequests.find(r => r.userToken === token && r.status === 'PENDING');
     if (reqItem) {
       try { payments.rejectRequest(reqItem.id, 'Cancelled by studio owner'); } catch(e) {}
+    } else {
+      try { payments.revokeUserPlan(token, 'Cancelled by studio owner'); } catch(e) {}
     }
 
     return res.send(`
@@ -832,7 +850,7 @@ app.post('/api/admin/quick-approve', (req, res) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Request Cancelled - Payal Films</title>
+        <title>Plan Cancelled - Payal Films</title>
         <style>
           body { font-family: -apple-system, sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
           .card { background: #1e293b; border: 1px solid #ef4444; border-radius: 16px; padding: 32px 24px; max-width: 480px; width: 100%; }
@@ -845,8 +863,8 @@ app.post('/api/admin/quick-approve', (req, res) => {
       <body>
         <div class="card">
           <div class="badge">✕</div>
-          <h2>Request Cancelled</h2>
-          <p>Aapne is payment approval ko cancel kar diya hai. User account upgrade nahi kiya gaya.</p>
+          <h2>Plan Cancelled / Revoked</h2>
+          <p>Aapne is plan ko cancel kar diya hai. User ke credits <strong>0</strong> kar diye gaye hain aur account downgrade ho chuka hai.</p>
           <a href="/" class="btn">Open Payal Films Studio &rarr;</a>
         </div>
       </body>

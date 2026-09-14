@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const manualUserTokenInput = document.getElementById('manualUserTokenInput');
   const manualPlanSelect = document.getElementById('manualPlanSelect');
   const manualUpgradeBtn = document.getElementById('manualUpgradeBtn');
+  const manualRevokeBtn = document.getElementById('manualRevokeBtn');
 
   const customWhatsappInput = document.getElementById('customWhatsappInput');
   const customUpiIdInput = document.getElementById('customUpiIdInput');
@@ -1584,9 +1585,14 @@ ${escapeHtml(schemaString)}
         <td>
           ${isPending ? `
             <button class="btn-approve-action" data-approve-id="${req.id}">✅ Allow</button>
-            <button class="btn-reject-action" data-reject-id="${req.id}">❌</button>
+            <button class="btn-reject-action" data-reject-id="${req.id}" data-reject-token="${req.userToken}" title="Reject & Set Credits to 0">❌ Reject</button>
+          ` : req.status === 'APPROVED' ? `
+            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #10b981;">APPROVED</span>
+              <button class="btn-revoke-action" data-revoke-token="${req.userToken}" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-weight: 600;" title="Cancel plan & set credits to 0">⛔ Cancel Plan</button>
+            </div>
           ` : `
-            <span style="font-size: 0.75rem; font-weight: 700; color: ${req.status === 'APPROVED' ? '#10b981' : '#ef4444'};">
+            <span style="font-size: 0.75rem; font-weight: 700; color: #ef4444;">
               ${req.status}
             </span>
           `}
@@ -1595,7 +1601,7 @@ ${escapeHtml(schemaString)}
       adminRequestsTableBody.appendChild(tr);
     });
 
-    // Attach click events
+    // Attach click events: Approve
     adminRequestsTableBody.querySelectorAll('[data-approve-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const reqId = btn.getAttribute('data-approve-id');
@@ -1618,22 +1624,54 @@ ${escapeHtml(schemaString)}
       });
     });
 
+    // Attach click events: Reject Pending
     adminRequestsTableBody.querySelectorAll('[data-reject-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const reqId = btn.getAttribute('data-reject-id');
-        if (!confirm('Are you sure you want to reject this request?')) return;
+        const token = btn.getAttribute('data-reject-token');
+        if (!confirm('Are you sure you want to reject this request and revoke credits to 0?')) return;
         try {
           const res = await fetch('/api/admin/reject-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requestId: reqId, secret: currentAdminSecret })
+            body: JSON.stringify({ requestId: reqId, secret: currentAdminSecret, reason: 'Rejected by admin' })
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Rejection failed');
-          showToast('Request marked as rejected.', 'success');
+          showToast('Request rejected & user credits set to 0.', 'success');
           loadAdminRequests();
+          if (token && token === userToken) {
+            fetchUserStatus();
+          }
         } catch (err) {
           showToast(`Error: ${err.message}`, 'error');
+        }
+      });
+    });
+
+    // Attach click events: Revoke Approved Plan
+    adminRequestsTableBody.querySelectorAll('[data-revoke-token]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const token = btn.getAttribute('data-revoke-token');
+        if (!confirm(`Kya aap User ${token} ka plan cancel karke credits 0 karna chahte hain?`)) return;
+        btn.disabled = true;
+        btn.textContent = 'Cancelling...';
+        try {
+          const res = await fetch('/api/admin/revoke-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userToken: token, secret: currentAdminSecret, reason: 'Cancelled from admin panel' })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.success) throw new Error(data.error || 'Revoke failed');
+          showToast(`⛔ User ${token} ka plan cancel aur credits 0 kar diye gaye hain.`, 'success');
+          loadAdminRequests();
+          if (token === userToken) {
+            fetchUserStatus();
+          }
+        } catch (err) {
+          showToast(`Error: ${err.message}`, 'error');
+          btn.disabled = false;
         }
       });
     });
@@ -1667,6 +1705,42 @@ ${escapeHtml(schemaString)}
       } finally {
         manualUpgradeBtn.disabled = false;
         manualUpgradeBtn.textContent = 'Approve & Allow';
+      }
+    });
+  }
+
+  // Direct Manual User Revoke (Reset to 0 Credits)
+  if (manualRevokeBtn && manualUserTokenInput) {
+    manualRevokeBtn.addEventListener('click', async () => {
+      const token = manualUserTokenInput.value.trim();
+      if (!token) {
+        showToast('Please enter customer User Token to revoke', 'error');
+        return;
+      }
+      if (!confirm(`Kya aap User ${token} ka plan cancel karke credits 0 karna chahte hain?`)) return;
+
+      manualRevokeBtn.disabled = true;
+      manualRevokeBtn.textContent = 'Revoking...';
+
+      try {
+        const res = await fetch('/api/admin/revoke-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userToken: token, secret: currentAdminSecret, reason: 'Direct admin revoke' })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Failed to revoke user');
+        showToast(`⛔ User ${token} credits reset to 0 and plan revoked!`, 'success');
+        manualUserTokenInput.value = '';
+        loadAdminRequests();
+        if (token === userToken) {
+          fetchUserStatus();
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`, 'error');
+      } finally {
+        manualRevokeBtn.disabled = false;
+        manualRevokeBtn.textContent = '⛔ Cancel / Revoke (0 Credits)';
       }
     });
   }

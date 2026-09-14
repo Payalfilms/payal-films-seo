@@ -498,7 +498,7 @@ function approveRequest(requestId) {
   };
 }
 
-// Reject Request
+// Reject Request & Revoke User Plan/Credits
 function rejectRequest(requestId, reason) {
   const db = loadDb();
   const req = db.pendingRequests.find(r => r.id === requestId);
@@ -508,8 +508,47 @@ function rejectRequest(requestId, reason) {
   req.rejectedAt = new Date().toISOString();
   req.rejectReason = reason || 'Payment could not be verified by studio admin.';
 
+  // Revoke user's plan and reset credits to 0
+  if (db.users[req.userToken]) {
+    const user = db.users[req.userToken];
+    user.plan = 'free';
+    user.creditsRemaining = 0; // Credits completely reset
+    user.revokedAt = new Date().toISOString();
+    user.revokeReason = reason || 'Plan rejected/cancelled by studio admin';
+    user.updatedAt = new Date().toISOString();
+  }
+
   saveDb(db);
-  return { success: true, request: req };
+  return { success: true, request: req, message: `Request rejected and user credits revoked to 0.` };
+}
+
+// Revoke User Plan directly by User Token
+function revokeUserPlan(userToken, reason = 'Plan cancelled by studio admin') {
+  const db = loadDb();
+  if (!db.users[userToken]) {
+    throw new Error('User account not found with this token');
+  }
+
+  const user = db.users[userToken];
+  user.plan = 'free';
+  user.creditsRemaining = 0; // Credits reset to 0
+  user.revokedAt = new Date().toISOString();
+  user.revokeReason = reason;
+  user.updatedAt = new Date().toISOString();
+
+  // Also mark any request for this user as REJECTED
+  if (db.pendingRequests) {
+    db.pendingRequests.forEach(r => {
+      if (r.userToken === userToken) {
+        r.status = 'REJECTED';
+        r.rejectedAt = new Date().toISOString();
+        r.rejectReason = reason;
+      }
+    });
+  }
+
+  saveDb(db);
+  return user;
 }
 
 module.exports = {
@@ -523,6 +562,7 @@ module.exports = {
   getPendingRequests,
   approveRequest,
   rejectRequest,
-  findUserByTokenOrPhone
+  findUserByTokenOrPhone,
+  revokeUserPlan
 };
 
