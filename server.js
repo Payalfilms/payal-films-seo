@@ -391,7 +391,7 @@ app.get('/api/config', (req, res) => {
   res.json({
     hasServerKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== ''),
     serverPort: PORT,
-    brand: 'Payal Films Photography',
+    brand: 'Payal films Image Seo Software online',
     upiId: process.env.UPI_ID || 'payalfilmskhagaria@axl',
     whatsappNumber: process.env.WHATSAPP_NUMBER || ''
   });

@@ -1,4 +1,4 @@
-# Robots.txt for Payal Films Image SEO Pro
+# Robots.txt for Payal films Image Seo Software online
 User-agent: *
 Allow: /
 Disallow: /api/admin/
