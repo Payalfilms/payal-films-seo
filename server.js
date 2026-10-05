@@ -589,9 +589,9 @@ app.get('/api/admin/quick-approve', (req, res) => {
       <!DOCTYPE html>
       <html>
       <head><meta charset="UTF-8"><title>Unauthorized</title></head>
-      <body style="font-family:sans-serif; background:#0f172a; color:#fff; text-align:center; padding:50px;">
-        <h2 style="color:#ef4444;">❌ Invalid Admin Secret</h2>
-        <p>Security check failed. Please approve from the Payal Films Admin Dashboard.</p>
+      <body style="font-family:'Inter',system-ui,sans-serif; background:#1c1815; color:#d6cfc7; text-align:center; padding:50px;">
+        <h2 style="color:#f2b8b5; font-family:'Cormorant Garamond',Georgia,serif; font-size:2rem;">❌ Invalid Admin Secret</h2>
+        <p style="color:#9e9389;">Security check failed. Please approve from the Payal Films Admin Dashboard.</p>
       </body>
       </html>
     `);
@@ -615,19 +615,19 @@ app.get('/api/admin/quick-approve', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Already Approved - Payal Films</title>
         <style>
-          body { font-family: 'Segoe UI', sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-          .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 32px 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-          .badge { background: #10b981; color: #fff; width: 64px; height: 64px; border-radius: 50%; line-height: 64px; font-size: 32px; margin: 0 auto 16px; }
-          h2 { color: #34d399; margin: 0 0 10px; }
-          .btn { display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin-top: 16px; }
+          body { font-family: 'Inter', system-ui, sans-serif; background: #1c1815; color: #d6cfc7; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+          .card { background: #25201b; border: 1px solid rgba(150, 114, 62, 0.45); border-radius: 16px; padding: 32px 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+          .badge { background: rgba(150, 114, 62, 0.22); border: 1px solid #d6b47c; color: #d6b47c; width: 64px; height: 64px; border-radius: 50%; line-height: 64px; font-size: 32px; margin: 0 auto 16px; }
+          h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.8rem; color: #ffffff; margin: 0 0 10px; }
+          .btn { display: inline-block; background: linear-gradient(135deg, #96723e, #d6b47c); color: #1c1815; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin-top: 16px; box-shadow: 0 4px 14px rgba(150, 114, 62, 0.35); }
         </style>
       </head>
       <body>
         <div class="card">
           <div class="badge">✓</div>
           <h2>Already Approved!</h2>
-          <p>Ye plan pehle se hi active hai: <strong>${planInfo.name}</strong></p>
-          <p style="color: #94a3b8; font-size: 0.9rem;">Customer: ${customerName} (${customerPhone})</p>
+          <p>Ye plan pehle se hi active hai: <strong style="color: #d6b47c;">${planInfo.name}</strong></p>
+          <p style="color: #9e9389; font-size: 0.9rem;">Customer: ${customerName} (${customerPhone})</p>
           <a href="/" class="btn">Open Payal Films Studio &rarr;</a>
         </div>
       </body>
@@ -646,9 +646,9 @@ app.get('/api/admin/quick-approve', (req, res) => {
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-          background: #0b0f19;
-          color: #f8fafc;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          background: #1c1815;
+          color: #d6cfc7;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -656,8 +656,8 @@ app.get('/api/admin/quick-approve', (req, res) => {
           padding: 20px 16px;
         }
         .card {
-          background: #1e293b;
-          border: 1px solid #334155;
+          background: #25201b;
+          border: 1px solid rgba(150, 114, 62, 0.45);
           border-radius: 20px;
           padding: 32px 24px;
           max-width: 500px;
@@ -672,9 +672,9 @@ app.get('/api/admin/quick-approve', (req, res) => {
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: rgba(245, 158, 11, 0.15);
-          border: 2px solid #f59e0b;
-          color: #fbbf24;
+          background: rgba(150, 114, 62, 0.22);
+          border: 2px solid #d6b47c;
+          color: #d6b47c;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -682,17 +682,18 @@ app.get('/api/admin/quick-approve', (req, res) => {
           margin: 0 auto 12px;
         }
         h2 {
-          font-size: 1.4rem;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 1.8rem;
           color: #ffffff;
           margin-bottom: 6px;
         }
         .subtitle {
           font-size: 0.88rem;
-          color: #94a3b8;
+          color: #9e9389;
         }
         .details-box {
-          background: #0f172a;
-          border: 1px solid #334155;
+          background: #1a1613;
+          border: 1px solid rgba(150, 114, 62, 0.3);
           border-radius: 12px;
           padding: 16px;
           margin-bottom: 24px;
@@ -702,37 +703,37 @@ app.get('/api/admin/quick-approve', (req, res) => {
           justify-content: space-between;
           align-items: center;
           padding: 8px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-bottom: 1px solid rgba(150, 114, 62, 0.15);
           font-size: 0.9rem;
         }
         .detail-row:last-child {
           border-bottom: none;
         }
         .label {
-          color: #94a3b8;
+          color: #9e9389;
         }
         .val {
           font-weight: 600;
-          color: #f1f5f9;
+          color: #ffffff;
         }
         .val-price {
-          color: #34d399;
-          font-size: 1.15rem;
+          color: #d6b47c;
+          font-size: 1.25rem;
           font-weight: 800;
         }
         .val-token {
           font-family: monospace;
-          color: #67e8f9;
+          color: #d6b47c;
           font-size: 0.8rem;
         }
         .confirm-prompt {
-          background: rgba(99, 102, 241, 0.12);
-          border: 1px solid rgba(99, 102, 241, 0.3);
+          background: rgba(150, 114, 62, 0.15);
+          border: 1px solid rgba(150, 114, 62, 0.35);
           border-radius: 10px;
           padding: 12px 14px;
           margin-bottom: 24px;
           font-size: 0.88rem;
-          color: #c7d2fe;
+          color: #d6b47c;
           text-align: center;
           line-height: 1.4;
         }
@@ -751,21 +752,21 @@ app.get('/api/admin/quick-approve', (req, res) => {
           transform: scale(0.98);
         }
         .btn-approve {
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: #ffffff;
+          background: linear-gradient(135deg, #96723e, #d6b47c);
+          color: #1c1815;
           margin-bottom: 12px;
-          box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+          box-shadow: 0 4px 14px rgba(150, 114, 62, 0.35);
         }
         .btn-approve:hover {
-          background: #10b981;
+          filter: brightness(1.1);
         }
         .btn-reject {
-          background: rgba(239, 68, 68, 0.15);
-          border: 1px solid #ef4444;
-          color: #fca5a5;
+          background: rgba(197, 90, 82, 0.15);
+          border: 1px solid rgba(197, 90, 82, 0.4);
+          color: #f2b8b5;
         }
         .btn-reject:hover {
-          background: rgba(239, 68, 68, 0.25);
+          background: rgba(197, 90, 82, 0.25);
           color: #ffffff;
         }
       </style>
@@ -866,19 +867,19 @@ app.post('/api/admin/quick-approve', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Plan Cancelled - Payal Films</title>
         <style>
-          body { font-family: -apple-system, sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
-          .card { background: #1e293b; border: 1px solid #ef4444; border-radius: 16px; padding: 32px 24px; max-width: 480px; width: 100%; }
-          .badge { width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: #ef4444; line-height: 64px; font-size: 32px; margin: 0 auto 16px; }
-          h2 { color: #f87171; margin-bottom: 8px; }
-          p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 20px; }
-          .btn { display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; }
+          body { font-family: 'Inter', system-ui, sans-serif; background: #1c1815; color: #d6cfc7; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
+          .card { background: #25201b; border: 1px solid rgba(197, 90, 82, 0.45); border-radius: 16px; padding: 32px 24px; max-width: 480px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+          .badge { width: 64px; height: 64px; border-radius: 50%; background: rgba(197, 90, 82, 0.18); border: 1px solid rgba(197, 90, 82, 0.4); color: #f2b8b5; line-height: 64px; font-size: 32px; margin: 0 auto 16px; }
+          h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.8rem; color: #f2b8b5; margin-bottom: 8px; }
+          p { color: #9e9389; font-size: 0.95rem; margin-bottom: 20px; }
+          .btn { display: inline-block; background: #1c1815; border: 1px solid #96723e; color: #d6b47c; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; }
         </style>
       </head>
       <body>
         <div class="card">
           <div class="badge">✕</div>
           <h2>Plan Cancelled / Revoked</h2>
-          <p>Aapne is plan ko cancel kar diya hai. User ke credits <strong>0</strong> kar diye gaye hain aur account downgrade ho chuka hai.</p>
+          <p>Aapne is plan ko cancel kar diya hai. User ke credits <strong style="color: #f2b8b5;">0</strong> kar diye gaye hain aur account downgrade ho chuka hai.</p>
           <a href="/" class="btn">Open Payal Films Studio &rarr;</a>
         </div>
       </body>
@@ -906,16 +907,16 @@ app.post('/api/admin/quick-approve', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Payment Approved - Payal Films Admin</title>
         <style>
-          body { font-family: -apple-system, sans-serif; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-          .card { background: #1e293b; border: 1px solid #10b981; border-radius: 20px; padding: 36px 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 24px 48px rgba(16, 185, 129, 0.15); }
-          .badge { background: #10b981; color: #fff; width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 34px; margin: 0 auto 18px; box-shadow: 0 0 24px rgba(16, 185, 129, 0.5); }
-          h2 { margin: 0 0 10px; font-size: 1.5rem; color: #34d399; }
-          p { color: #94a3b8; font-size: 0.95rem; margin: 6px 0; }
-          .details { background: #0f172a; border-radius: 12px; padding: 16px; margin: 20px 0; text-align: left; font-size: 0.9rem; }
+          body { font-family: 'Inter', system-ui, sans-serif; background: #1c1815; color: #d6cfc7; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+          .card { background: #25201b; border: 1px solid rgba(150, 114, 62, 0.5); border-radius: 20px; padding: 36px 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); }
+          .badge { background: rgba(150, 114, 62, 0.22); border: 1px solid #d6b47c; color: #d6b47c; width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 34px; margin: 0 auto 18px; box-shadow: 0 0 24px rgba(214, 180, 124, 0.3); }
+          h2 { font-family: 'Cormorant Garamond', Georgia, serif; margin: 0 0 10px; font-size: 1.8rem; color: #ffffff; }
+          p { color: #9e9389; font-size: 0.95rem; margin: 6px 0; }
+          .details { background: #1a1613; border: 1px solid rgba(150, 114, 62, 0.3); border-radius: 12px; padding: 16px; margin: 20px 0; text-align: left; font-size: 0.9rem; }
           .details div { margin: 8px 0; display: flex; justify-content: space-between; }
-          .details span { color: #94a3b8; }
-          .details strong { color: #f1f5f9; }
-          .btn-home { display: inline-block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin-top: 14px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+          .details span { color: #9e9389; }
+          .details strong { color: #ffffff; }
+          .btn-home { display: inline-block; background: linear-gradient(135deg, #96723e, #d6b47c); color: #1c1815; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin-top: 14px; box-shadow: 0 4px 12px rgba(150, 114, 62, 0.35); }
         </style>
       </head>
       <body>
@@ -925,11 +926,11 @@ app.post('/api/admin/quick-approve', (req, res) => {
           <p>User ka account abhi instantly unlock aur upgrade kar diya gaya hai.</p>
           <div class="details">
             <div><span>Customer:</span> <strong>${user.customerName || 'Studio Client'}</strong></div>
-            <div><span>Activated Plan:</span> <strong style="color: #34d399;">${planInfo.name}</strong></div>
-            <div><span>New Quota:</span> <strong>${user.creditsRemaining === null || plan === 'lifetime' ? '👑 Unlimited Forever' : user.creditsRemaining + ' Credits'}</strong></div>
-            <div><span>Status:</span> <strong style="color:#10b981;">ACTIVE NOW</strong></div>
+            <div><span>Activated Plan:</span> <strong style="color: #d6b47c;">${planInfo.name}</strong></div>
+            <div><span>New Quota:</span> <strong style="color: #d6b47c;">${user.creditsRemaining === null || plan === 'lifetime' ? '👑 Unlimited Forever' : user.creditsRemaining + ' Credits'}</strong></div>
+            <div><span>Status:</span> <strong style="color: #d6b47c;">ACTIVE NOW</strong></div>
           </div>
-          <p style="font-size:0.82rem; color:#64748b;">Customer ke device par screen automatically unlock ho chuki hai.</p>
+          <p style="font-size:0.82rem; color:#9e9389;">Customer ke device par screen automatically unlock ho chuki hai.</p>
           <a href="/" class="btn-home">Go to Image SEO Studio &rarr;</a>
         </div>
       </body>

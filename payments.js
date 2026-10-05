@@ -132,7 +132,7 @@ async function generateUpiQr(planId, userToken, customUpiId) {
     width: 320,
     margin: 2,
     color: {
-      dark: '#0f172a',
+      dark: '#1c1815',
       light: '#ffffff'
     }
   });

@@ -42,7 +42,7 @@
   <meta name="geo.placename" content="Khagaria, Bihar, India">
   <meta name="geo.position" content="25.5000;86.4833">
   <meta name="ICBM" content="25.5000, 86.4833">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#1c1815">
 
   <!-- Structured Data: WebSite JSON-LD (Essential for Google Search Site Names) -->
   <script type="application/ld+json">
@@ -219,7 +219,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -866,8 +866,8 @@
           <span>📍 Khagaria, Bihar, India (851204)</span>
           <span>📞 WhatsApp: +91 7011935516</span>
           <span>💳 Official UPI: payalfilmskhagaria@axl</span>
-          <a href="https://billing.payalfilms.in/" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">🧾 Billing Software ↗</a>
-          <a href="https://photoselection.payalfilms.in/" target="_blank" rel="noopener noreferrer" style="color: #c084fc; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">📸 Photo Selection App ↗</a>
+          <a href="https://billing.payalfilms.in/" target="_blank" rel="noopener noreferrer" style="color: #d6b47c; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">🧾 Billing Software ↗</a>
+          <a href="https://photoselection.payalfilms.in/" target="_blank" rel="noopener noreferrer" style="color: #d6b47c; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">📸 Photo Selection App ↗</a>
         </div>
       </div>
     </section>
@@ -992,11 +992,11 @@
               <!-- Mandatory Customer Inputs -->
               <div class="form-row-pay">
                 <div class="form-group-sm">
-                  <label for="customerNameInput">Your Full Name <span style="color: #ef4444; font-weight: bold;">*</span></label>
+                  <label for="customerNameInput">Your Full Name <span style="color: #d6b47c; font-weight: bold;">*</span></label>
                   <input type="text" id="customerNameInput" placeholder="Enter full name" class="input-sm" required />
                 </div>
                 <div class="form-group-sm">
-                  <label for="customerPhoneInput">WhatsApp Number <span style="color: #ef4444; font-weight: bold;">*</span></label>
+                  <label for="customerPhoneInput">WhatsApp Number <span style="color: #d6b47c; font-weight: bold;">*</span></label>
                   <input type="tel" id="customerPhoneInput" placeholder="10-digit mobile number" class="input-sm" maxlength="15" required />
                 </div>
               </div>
@@ -1009,13 +1009,13 @@
                 <input type="file" id="paymentScreenshotInput" accept="image/*" class="file-input" required />
                 <div class="screenshot-drop-content" id="screenshotPrompt">
                   <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                  <span>Select / Drop Payment Screenshot <span style="color: #ef4444; font-weight: bold;">*</span></span>
+                  <span>Select / Drop Payment Screenshot <span style="color: #d6b47c; font-weight: bold;">*</span></span>
                   <small>PhonePe / GPay / Paytm Screenshot (Mandatory)</small>
                 </div>
                 <div class="screenshot-preview-wrap" id="screenshotPreviewWrap" style="display: none;">
                   <img src="" id="screenshotImgPreview" alt="Receipt Preview" />
                   <span class="file-name-tag" id="screenshotFileName">receipt.jpg</span>
-                  <button type="button" class="btn-change-file" id="changeScreenshotBtn" style="margin-top: 4px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 3px 8px; border-radius: 4px; cursor: pointer;">✕ Change Screenshot</button>
+                  <button type="button" class="btn-change-file" id="changeScreenshotBtn" style="margin-top: 4px; font-size: 0.75rem; background: rgba(150, 114, 62, 0.22); border: 1px solid #96723e; color: #d6b47c; padding: 3px 8px; border-radius: 4px; cursor: pointer;">✕ Change Screenshot</button>
                 </div>
               </div>
 
@@ -1090,7 +1090,7 @@
             <span class="admin-stat-pill" id="pendingRequestsCountBadge">0 Pending Requests</span>
             <div style="display: flex; gap: 8px; align-items: center;">
               <button class="btn btn-secondary btn-sm" id="refreshAdminBtn">🔄 Refresh List</button>
-              <button class="btn btn-secondary btn-sm" id="adminLogoutBtn" style="border-color: #ef4444; color: #fca5a5;">🔒 Lock / Logout</button>
+              <button class="btn btn-secondary btn-sm" id="adminLogoutBtn" style="border-color: #96723e; color: #d6b47c;">🔒 Lock / Logout</button>
             </div>
           </div>
 
@@ -1126,7 +1126,7 @@
                 <option value="lifetime">Lifetime VIP (Unlimited - ₹2,000)</option>
               </select>
               <button class="btn btn-success" id="manualUpgradeBtn">Approve & Allow</button>
-              <button class="btn btn-danger" id="manualRevokeBtn" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;">⛔ Cancel / Revoke (0 Credits)</button>
+              <button class="btn btn-danger" id="manualRevokeBtn" style="background: rgba(197, 90, 82, 0.18); border: 1px solid rgba(197, 90, 82, 0.4); color: #f2b8b5; padding: 10px 14px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;">⛔ Cancel / Revoke (0 Credits)</button>
             </div>
           </div>
         </div>

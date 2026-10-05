@@ -175,16 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (clientKey || serverHasKey) {
         aiStatusText.textContent = 'AI Vision Active (Gemini)';
-        aiStatusBadge.querySelector('.pulse-dot').style.background = '#10b981';
+        aiStatusBadge.querySelector('.pulse-dot').style.background = '#d6b47c';
         if (apiKeyBanner) {
-          apiKeyBanner.style.background = 'rgba(16, 185, 129, 0.1)';
-          apiKeyBanner.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+          apiKeyBanner.style.background = 'linear-gradient(135deg, rgba(150, 114, 62, 0.15), rgba(37, 32, 27, 0.9))';
+          apiKeyBanner.style.borderColor = 'rgba(150, 114, 62, 0.45)';
           apiKeyBanner.querySelector('.api-banner-left strong').textContent = '✅ Free Gemini AI Vision Active & Ready!';
           apiKeyBanner.querySelector('.api-banner-left p').textContent = 'Images will be analyzed visually using Google Gemini AI for peak ranking.';
         }
       } else {
         aiStatusText.textContent = 'Smart Heuristic Mode';
-        aiStatusBadge.querySelector('.pulse-dot').style.background = '#f59e0b';
+        aiStatusBadge.querySelector('.pulse-dot').style.background = '#96723e';
       }
 
       if (data.upiId && customUpiIdInput) {
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           if (seoNameCell) {
             const savingsBadge = itemResult.isCompressed 
-              ? ` <span style="display:inline-block; padding:1px 6px; border-radius:4px; font-size:0.75rem; background:rgba(16, 185, 129, 0.2); color:#34d399; font-weight:bold;">-${itemResult.savedPercent}%</span>`
+              ? ` <span style="display:inline-block; padding:1px 6px; border-radius:4px; font-size:0.75rem; background:rgba(150, 114, 62, 0.22); color:#d6b47c; border:1px solid rgba(150, 114, 62, 0.4); font-weight:bold;">-${itemResult.savedPercent}%</span>`
               : '';
             seoNameCell.innerHTML = `<span class="seo-name-cell" title="${escapeHtml(itemResult.newFilename)}">${escapeHtml(itemResult.newFilename)}</span>${savingsBadge}`;
           }
@@ -640,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusCell.innerHTML = `<span class="status-pill status-pill-error" title="${escapeHtml(err.message)}">❌ Error</span>`;
           }
           if (seoNameCell) {
-            seoNameCell.innerHTML = `<span style="color: #f87171; font-size: 0.75rem;">${escapeHtml(err.message)}</span>`;
+            seoNameCell.innerHTML = `<span style="color: #f2b8b5; font-size: 0.75rem;">${escapeHtml(err.message)}</span>`;
           }
           if (err.message.includes('Quota Exhausted')) {
             showToast('⚠️ Quota Finished: 10 Free credits completed. Please upgrade to continue batch processing!', 'error');
@@ -675,9 +675,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast(`Batch stopped. ${completedCount} images processed.`, 'error');
     } else {
       monitorSubtext.innerHTML = `<strong>🎉 Batch Processing Complete! All ${total} images have been visually analyzed and SEO-renamed.</strong>`;
-      batchCounterBadge.style.background = 'rgba(16, 185, 129, 0.2)';
-      batchCounterBadge.style.color = '#34d399';
-      batchCounterBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+      batchCounterBadge.style.background = 'rgba(150, 114, 62, 0.3)';
+      batchCounterBadge.style.color = '#d6b47c';
+      batchCounterBadge.style.borderColor = 'rgba(214, 180, 124, 0.6)';
       showToast(`🎉 All ${total} images processed successfully!`, 'success');
     }
   });
@@ -714,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeBrand = localStorage.getItem('studio_brand_name') || '';
 
     const compressionBadge = item.isCompressed 
-      ? `<span class="card-engine-tag" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">⚡ Web-Optimized (-${item.savedPercent}%)</span>`
+      ? `<span class="card-engine-tag" style="background: rgba(150, 114, 62, 0.22); color: #d6b47c; border: 1px solid rgba(150, 114, 62, 0.45);">⚡ Web-Optimized (-${item.savedPercent}%)</span>`
       : '';
 
     // Dynamic Schema.org object using backend generated schema or personalized metadata
@@ -739,8 +739,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const htmlImgTag = `<img src="${fullNewFilename}" alt="${escapeHtml(item.data.altText)}" title="${escapeHtml(item.data.title)}" loading="lazy" />`;
 
     const brandBadge = activeBrand
-      ? `<span class="card-engine-tag" style="background: rgba(99, 102, 241, 0.18); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.35);">🏢 ${escapeHtml(activeBrand)}</span>`
-      : `<span class="card-engine-tag" style="background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);">⚡ Personalized SEO</span>`;
+      ? `<span class="card-engine-tag" style="background: rgba(150, 114, 62, 0.22); color: #d6b47c; border: 1px solid rgba(150, 114, 62, 0.45);">🏢 ${escapeHtml(activeBrand)}</span>`
+      : `<span class="card-engine-tag" style="background: rgba(150, 114, 62, 0.22); color: #d6b47c; border: 1px solid rgba(150, 114, 62, 0.45);">⚡ Personalized SEO</span>`;
 
     card.innerHTML = `
       <div class="card-top-bar">
@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="image-meta-pills">
             ${item.isCompressed 
               ? `<span class="meta-pill" style="text-decoration: line-through; opacity: 0.6;" title="Original raw size">${origSizeKb} KB</span>
-                 <span class="meta-pill" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 600;" title="Compressed web size">⚡ ${displaySizeKb} KB</span>`
+                 <span class="meta-pill" style="background: rgba(150, 114, 62, 0.25); color: #d6b47c; border: 1px solid rgba(150, 114, 62, 0.4); font-weight: 600;" title="Compressed web size">⚡ ${displaySizeKb} KB</span>`
               : `<span class="meta-pill">${origSizeKb} KB</span>`
             }
             <span class="meta-pill">${ext.toUpperCase().replace('.', '')}</span>
@@ -1642,23 +1642,23 @@ ${escapeHtml(schemaString)}
           <div style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(req.customerPhone || '')}</div>
         </td>
         <td>
-          <span style="font-weight: 700; color: #34d399;">₹${req.amount}</span>
+          <span style="font-weight: 700; color: #d6b47c;">₹${req.amount}</span>
           <div style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(req.planName)}</div>
         </td>
         <td>${thumb}</td>
         <td><code>${escapeHtml(req.utrNumber || 'N/A')}</code></td>
-        <td><code style="font-size: 0.72rem; color: #93c5fd;">${escapeHtml(req.userToken)}</code></td>
+        <td><code style="font-size: 0.72rem; color: #d6b47c;">${escapeHtml(req.userToken)}</code></td>
         <td>
           ${isPending ? `
             <button class="btn-approve-action" data-approve-id="${req.id}">✅ Allow</button>
             <button class="btn-reject-action" data-reject-id="${req.id}" data-reject-token="${req.userToken}" title="Reject & Set Credits to 0">❌ Reject</button>
           ` : req.status === 'APPROVED' ? `
             <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-              <span style="font-size: 0.75rem; font-weight: 700; color: #10b981;">APPROVED</span>
-              <button class="btn-revoke-action" data-revoke-token="${req.userToken}" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-weight: 600;" title="Cancel plan & set credits to 0">⛔ Cancel Plan</button>
+              <span style="font-size: 0.75rem; font-weight: 700; color: #d6b47c;">APPROVED</span>
+              <button class="btn-revoke-action" data-revoke-token="${req.userToken}" style="background: rgba(197, 90, 82, 0.18); border: 1px solid rgba(197, 90, 82, 0.4); color: #f2b8b5; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-weight: 600;" title="Cancel plan & set credits to 0">⛔ Cancel Plan</button>
             </div>
           ` : `
-            <span style="font-size: 0.75rem; font-weight: 700; color: #ef4444;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: #f2b8b5;">
               ${req.status}
             </span>
           `}
